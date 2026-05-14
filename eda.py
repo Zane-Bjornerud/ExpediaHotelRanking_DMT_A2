@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+
 
 TEST_PATH = "test_set_VU_DM.csv"
 TRAIN_PATH = "training_set_VU_DM.csv"
@@ -48,12 +50,34 @@ print(dfTrain.groupby('srch_id')['booking_bool'].sum().value_counts().sort_index
 dfTrain.groupby('position')[['click_bool','booking_bool']].mean().head(20).plot()
 dfTrain.groupby(['random_bool','position'])['booking_bool'].mean().unstack(0).head(15)
 
+#price analysis
+print(dfTrain.groupby('booking_bool')['price_usd'].describe())
+dfTrain['price_usd'].clip(upper=1000).hist(bins=50)
 
-#look at the click rate
+#star rating & review score X booking
+print(dfTrain.groupby('prop_starrating')['booking_bool'].mean())
+print(dfTrain.groupby('prop_review_score')['booking_bool'].mean())
 
+#percentage of users with a history
+dfTrain['has_history'] = dfTrain['visitor_hist_starrating'].notna()
+print(dfTrain.groupby('has_history')['booking_bool'].mean())
 
-#check missingness - which columns have missing values and how many
+#competitor check
+for i in range(1, 9):
+    col = f'comp{i}_rate'
+    if col in dfTrain.columns:
+        pct_null = dfTrain[col].isna().mean()
+        print(f"{col}: {pct_null:.1%} null")
 
+#feature signal check
+numeric_cols = dfTrain.select_dtypes(include='number').columns
+corrs = dfTrain[numeric_cols].corrwith(dfTrain['booking_bool']).sort_values(key=abs, ascending=False)
+print(corrs.head(20))
+
+dfTrain.groupby('position')[['click_bool','booking_bool']].mean().head(20).plot()
+plt.title('Click/Booking Rate by Position')
+plt.savefig('position_bias.png', dpi=150, bbox_inches='tight')
+plt.close()
 
 #FEATURE ENGINEERING
 #hotels compete within a search
