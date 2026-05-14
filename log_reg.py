@@ -4,13 +4,13 @@ Expedia Hotel Ranking — Logistic Regression Baseline (with Hyperparameter Tuni
 VU Data Mining Techniques 2026 — Assignment 2
 =============================================================================
 Pipeline:
-  1. Load train/test data
-  2. Time-based split: train → train_fit + validation
-  3. Feature engineering
-  4. Hyperparameter tuning (grid search over C, penalty)
-  5. Evaluate best model on validation set (NDCG@5)
-  6. Retrain best config on full train set
-  7. Predict & create Kaggle submission
+  Load train/test data
+  Time-based split: train → train_fit + validation
+  Feature engineering
+  Hyperparameter tuning (grid search over C, penalty)
+  Evaluate best model on validation set (NDCG@5)
+  Retrain best config on full train set
+  Predict & create Kaggle submission
 
 Usage:
   pip install pandas numpy scikit-learn tqdm
