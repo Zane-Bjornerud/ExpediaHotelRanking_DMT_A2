@@ -7,9 +7,9 @@ TRAIN_PATH = "training_set_VU_DM.csv"
 nRows = 500_000
 
 #load small sample of the data
-print(f"Loading first {nRows:,} rows from {TRAIN_PATH}")
-dfTrain = pd.read_csv(TRAIN_PATH, nrows=nRows, low_memory=False)
-dfTest = pd.read_csv(TEST_PATH, nrows=nRows, low_memory=False)
+#print(f"Loading first {nRows:,} rows from {TRAIN_PATH}")
+dfTrain = pd.read_csv(TRAIN_PATH, low_memory=False)
+dfTest = pd.read_csv(TEST_PATH, low_memory=False)
 
 
 #check the shape of the rows
