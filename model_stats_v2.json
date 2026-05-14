@@ -1,0 +1,145 @@
+{
+  "best_params": {
+    "C": 0.01,
+    "penalty": "l1",
+    "ndcg5": 0.32485929178628287
+  },
+  "all_tuning_results": [
+    {
+      "C": 0.001,
+      "penalty": "l1",
+      "ndcg5": 0.3241015055565889
+    },
+    {
+      "C": 0.001,
+      "penalty": "l2",
+      "ndcg5": 0.32480982715782003
+    },
+    {
+      "C": 0.01,
+      "penalty": "l1",
+      "ndcg5": 0.32485929178628287
+    },
+    {
+      "C": 0.01,
+      "penalty": "l2",
+      "ndcg5": 0.32484600442235084
+    },
+    {
+      "C": 0.1,
+      "penalty": "l1",
+      "ndcg5": 0.32484581229999043
+    },
+    {
+      "C": 0.1,
+      "penalty": "l2",
+      "ndcg5": 0.32484581229999043
+    },
+    {
+      "C": 1.0,
+      "penalty": "l1",
+      "ndcg5": 0.32484581229999043
+    },
+    {
+      "C": 1.0,
+      "penalty": "l2",
+      "ndcg5": 0.32484581229999043
+    },
+    {
+      "C": 10.0,
+      "penalty": "l1",
+      "ndcg5": 0.32484581229999043
+    },
+    {
+      "C": 10.0,
+      "penalty": "l2",
+      "ndcg5": 0.32484581229999043
+    }
+  ],
+  "top_features": [
+    {
+      "feature": "prop_book_rate",
+      "coefficient": 0.12505453824996948
+    },
+    {
+      "feature": "prop_click_rate",
+      "coefficient": 0.06262446939945221
+    },
+    {
+      "feature": "price_rank_in_search",
+      "coefficient": -0.043749962002038956
+    },
+    {
+      "feature": "prop_location_score2",
+      "coefficient": 0.041394297033548355
+    },
+    {
+      "feature": "dest_book_rate",
+      "coefficient": 0.03151681646704674
+    },
+    {
+      "feature": "star_rank_in_search",
+      "coefficient": -0.03126521781086922
+    },
+    {
+      "feature": "price_vs_mean",
+      "coefficient": -0.020648980513215065
+    },
+    {
+      "feature": "promotion_flag",
+      "coefficient": 0.01867632567882538
+    },
+    {
+      "feature": "is_cheapest",
+      "coefficient": 0.016211271286010742
+    },
+    {
+      "feature": "review_rank_in_search",
+      "coefficient": -0.016159702092409134
+    }
+  ],
+  "features": [
+    "prop_starrating",
+    "prop_review_score",
+    "prop_brand_bool",
+    "prop_location_score1",
+    "prop_location_score2",
+    "prop_log_historical_price",
+    "price_usd",
+    "promotion_flag",
+    "srch_length_of_stay",
+    "srch_booking_window",
+    "srch_adults_count",
+    "srch_children_count",
+    "srch_room_count",
+    "srch_saturday_night_bool",
+    "orig_destination_distance",
+    "srch_query_affinity_score",
+    "missing_visitor_hist",
+    "missing_review_score",
+    "missing_distance",
+    "missing_affinity",
+    "visitor_hist_starrating",
+    "visitor_hist_adr_usd",
+    "star_diff",
+    "price_diff_hist",
+    "price_vs_mean",
+    "price_rank_in_search",
+    "is_cheapest",
+    "star_rank_in_search",
+    "review_rank_in_search",
+    "location_combined",
+    "comp_rate_cheaper_count",
+    "comp_rate_expensive_count",
+    "comp_rate_available_count",
+    "comp_no_inventory_count",
+    "price_per_person",
+    "total_cost",
+    "prop_click_rate",
+    "prop_book_rate",
+    "prop_count",
+    "dest_click_rate",
+    "dest_book_rate",
+    "dest_count"
+  ]
+}

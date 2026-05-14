@@ -1,0 +1,139 @@
+{
+  "best_params": {
+    "C": 0.001,
+    "penalty": "l2",
+    "ndcg5": 0.3175876231718921
+  },
+  "all_tuning_results": [
+    {
+      "C": 0.001,
+      "penalty": "l1",
+      "ndcg5": 0.31726748899998697
+    },
+    {
+      "C": 0.001,
+      "penalty": "l2",
+      "ndcg5": 0.3175876231718921
+    },
+    {
+      "C": 0.01,
+      "penalty": "l1",
+      "ndcg5": 0.317537523803908
+    },
+    {
+      "C": 0.01,
+      "penalty": "l2",
+      "ndcg5": 0.3175694335555983
+    },
+    {
+      "C": 0.1,
+      "penalty": "l1",
+      "ndcg5": 0.3175538568543035
+    },
+    {
+      "C": 0.1,
+      "penalty": "l2",
+      "ndcg5": 0.3175640622533906
+    },
+    {
+      "C": 1.0,
+      "penalty": "l1",
+      "ndcg5": 0.31755928735389627
+    },
+    {
+      "C": 1.0,
+      "penalty": "l2",
+      "ndcg5": 0.31755928735389627
+    },
+    {
+      "C": 10.0,
+      "penalty": "l1",
+      "ndcg5": 0.3175545124544019
+    },
+    {
+      "C": 10.0,
+      "penalty": "l2",
+      "ndcg5": 0.31755928735389627
+    }
+  ],
+  "top_features": [
+    {
+      "feature": "prop_location_score2",
+      "coefficient": 0.06268595159053802
+    },
+    {
+      "feature": "price_rank_in_search",
+      "coefficient": -0.06250137090682983
+    },
+    {
+      "feature": "star_rank_in_search",
+      "coefficient": -0.04379259794950485
+    },
+    {
+      "feature": "review_rank_in_search",
+      "coefficient": -0.031261999160051346
+    },
+    {
+      "feature": "promotion_flag",
+      "coefficient": 0.030321018770337105
+    },
+    {
+      "feature": "price_vs_mean",
+      "coefficient": -0.01837499439716339
+    },
+    {
+      "feature": "is_cheapest",
+      "coefficient": 0.01695745624601841
+    },
+    {
+      "feature": "srch_length_of_stay",
+      "coefficient": -0.01575644314289093
+    },
+    {
+      "feature": "srch_booking_window",
+      "coefficient": -0.01562773622572422
+    },
+    {
+      "feature": "prop_location_score1",
+      "coefficient": -0.015207845717668533
+    }
+  ],
+  "features": [
+    "prop_starrating",
+    "prop_review_score",
+    "prop_brand_bool",
+    "prop_location_score1",
+    "prop_location_score2",
+    "prop_log_historical_price",
+    "price_usd",
+    "promotion_flag",
+    "srch_length_of_stay",
+    "srch_booking_window",
+    "srch_adults_count",
+    "srch_children_count",
+    "srch_room_count",
+    "srch_saturday_night_bool",
+    "orig_destination_distance",
+    "srch_query_affinity_score",
+    "missing_visitor_hist",
+    "missing_review_score",
+    "missing_distance",
+    "missing_affinity",
+    "visitor_hist_starrating",
+    "visitor_hist_adr_usd",
+    "star_diff",
+    "price_diff_hist",
+    "price_vs_mean",
+    "price_rank_in_search",
+    "is_cheapest",
+    "star_rank_in_search",
+    "review_rank_in_search",
+    "location_combined",
+    "comp_rate_cheaper_count",
+    "comp_rate_expensive_count",
+    "comp_rate_available_count",
+    "comp_no_inventory_count",
+    "price_per_person",
+    "total_cost"
+  ]
+}
