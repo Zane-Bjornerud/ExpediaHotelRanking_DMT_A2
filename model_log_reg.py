@@ -136,6 +136,16 @@ def engineer_features(df, prop_stats, dest_stats, global_click_rate, global_book
     f["price_per_person"] = (df["price_usd"] / total_guests).astype("float32")
     f["total_cost"] = (df["price_usd"] * df["srch_length_of_stay"]).astype("float32")
 
+    # Price vs historical price (is this hotel discounted right now?)
+    hist_price = np.exp(df["prop_log_historical_price"]).replace(0, 1)
+    f["price_vs_historical"] = (df["price_usd"] / hist_price).astype("float32")
+
+    # Price per night
+    f["price_per_night"] = (df["price_usd"] / df["srch_length_of_stay"].replace(0, 1)).astype("float32")
+
+    # Value: star rating per dollar (scaled for readability)
+    f["star_per_dollar"] = (df["prop_starrating"] / df["price_usd"].replace(0, 1) * 100).astype("float32")
+
     #Per-property historical stats
     # Some hotels consistently get booked more — this captures hotel quality
     # beyond what star rating and review score tell us
@@ -164,10 +174,19 @@ print(f"  {len(feature_cols)} features created")
 # PREPARE TRAIN/VAL ARRAYS
 X_train = train_features.loc[train_mask]
 X_val = train_features.loc[val_mask]
-y_train_book = dfTrain.loc[train_mask, "booking_bool"].values
-y_val_book = dfTrain.loc[val_mask, "booking_bool"].values
+
+# Combined target: booking=1 (highest priority), click_only=1 (also positive signal)
+# Both clicks and bookings indicate user interest, so we train a single model
+# that predicts "user engaged with this hotel" — then use sample weights
+# to make bookings count more than clicks during training
 y_train_click = dfTrain.loc[train_mask, "click_bool"].values
+y_train_book = dfTrain.loc[train_mask, "booking_bool"].values
 y_val_click = dfTrain.loc[val_mask, "click_bool"].values
+y_val_book = dfTrain.loc[val_mask, "booking_bool"].values
+
+# Target: 1 if user clicked OR booked, 0 otherwise
+y_train_engaged = ((y_train_click == 1) | (y_train_book == 1)).astype(int)
+y_val_engaged = ((y_val_click == 1) | (y_val_book == 1)).astype(int)
 
 
 # SCALE FEATURES
@@ -199,7 +218,9 @@ def compute_ndcg5(srch_ids, preds, click_bools, booking_bools):
     return np.mean(scores), len(scores)
 
 
-# HYPERPARAMETER TUNING (using combined click+booking score)
+# HYPERPARAMETER TUNING
+# Single model with sample weights: bookings get weight 5, clicks get weight 1
+# This mirrors the NDCG relevance grades in the loss function
 print("\nTuning hyperparameters")
 
 param_grid = {
@@ -212,35 +233,30 @@ print(f"  Testing {len(param_combos)} combinations:\n")
 
 best_ndcg = -1
 best_params = None
+best_weight = 5
 all_results = []
 
 val_srch_ids = dfTrain.loc[val_mask, "srch_id"].values
 val_clicks = dfTrain.loc[val_mask, "click_bool"].values
 val_books = dfTrain.loc[val_mask, "booking_bool"].values
 
+# Sample weights: base weight 1 for clicks, higher weight for bookings
+# This tells the model "getting bookings right matters more"
 for i, (C, penalty) in enumerate(param_combos):
     print(f"  [{i+1}/{len(param_combos)}] C={C:<6}, penalty={penalty}", end=" ... ")
 
-    # Train booking model
-    book_model = LogisticRegression(
+    sample_weights = np.ones(len(y_train_engaged))
+    sample_weights[y_train_book == 1] = 5  # bookings matter more
+
+    model = LogisticRegression(
         C=C, penalty=penalty, solver="saga",
         max_iter=200, random_state=42, n_jobs=-1,
     )
-    book_model.fit(X_train_scaled, y_train_book)
-    book_preds = book_model.predict_proba(X_val_scaled)[:, 1]
+    model.fit(X_train_scaled, y_train_engaged, sample_weight=sample_weights)
 
-    # Train click model with same hyperparameters
-    click_model = LogisticRegression(
-        C=C, penalty=penalty, solver="saga",
-        max_iter=200, random_state=42, n_jobs=-1,
-    )
-    click_model.fit(X_train_scaled, y_train_click)
-    click_preds = click_model.predict_proba(X_val_scaled)[:, 1]
+    val_preds = model.predict_proba(X_val_scaled)[:, 1]
 
-    # Combine: booking is worth 5x click in NDCG scoring
-    combined_preds = 5 * book_preds + 1 * click_preds
-
-    ndcg, n = compute_ndcg5(val_srch_ids, combined_preds, val_clicks, val_books)
+    ndcg, n = compute_ndcg5(val_srch_ids, val_preds, val_clicks, val_books)
 
     result = {"C": C, "penalty": penalty, "ndcg5": ndcg}
     all_results.append(result)
@@ -256,8 +272,42 @@ print(f"\n  BEST: C={best_params['C']}, penalty={best_params['penalty']} -> NDCG
 pd.DataFrame(all_results).sort_values("ndcg5", ascending=False).to_csv("tuning_results.csv", index=False)
 
 
+# BOOKING WEIGHT TUNING
+# The booking weight of 5 mirrors NDCG but may not be optimal
+print("\nTuning booking sample weight with best model")
+
+best_weight_ndcg = -1
+best_booking_weight = 5
+weight_results = []
+
+for w in [1, 2, 3, 5, 7, 10, 15, 20]:
+    sample_weights = np.ones(len(y_train_engaged))
+    sample_weights[y_train_book == 1] = w
+
+    model = LogisticRegression(
+        C=best_params["C"], penalty=best_params["penalty"], solver="saga",
+        max_iter=200, random_state=42, n_jobs=-1,
+    )
+    model.fit(X_train_scaled, y_train_engaged, sample_weight=sample_weights)
+
+    val_preds = model.predict_proba(X_val_scaled)[:, 1]
+    ndcg, _ = compute_ndcg5(val_srch_ids, val_preds, val_clicks, val_books)
+
+    weight_results.append({"booking_weight": w, "ndcg5": ndcg})
+    marker = " *** BEST ***" if ndcg > best_weight_ndcg else ""
+    print(f"  booking_weight={w:>4} -> NDCG@5 = {ndcg:.5f}{marker}")
+
+    if ndcg > best_weight_ndcg:
+        best_weight_ndcg = ndcg
+        best_booking_weight = w
+
+print(f"\n  BEST WEIGHT: {best_booking_weight} -> NDCG@5 = {best_weight_ndcg:.5f}")
+
+pd.DataFrame(weight_results).sort_values("ndcg5", ascending=False).to_csv("weight_results.csv", index=False)
+
+
 #RETRAIN ON FULL TRAINING SET
-print("\nRetraining best models on full training data")
+print("\nRetraining best model on full training data")
 
 # Recompute property/destination stats on FULL training set for final model
 prop_stats_full = dfTrain.groupby("prop_id").agg(
@@ -281,25 +331,24 @@ test_features_final = engineer_features(dfTest, prop_stats_full, dest_stats_full
 scaler_final = StandardScaler()
 X_full_scaled = scaler_final.fit_transform(full_features)
 
-# Final booking model
-final_book_model = LogisticRegression(
+# Combined target and weights on full training set
+y_full_click = dfTrain["click_bool"].values
+y_full_book = dfTrain["booking_bool"].values
+y_full_engaged = ((y_full_click == 1) | (y_full_book == 1)).astype(int)
+full_sample_weights = np.ones(len(y_full_engaged))
+full_sample_weights[y_full_book == 1] = best_booking_weight
+
+final_model = LogisticRegression(
     C=best_params["C"], penalty=best_params["penalty"], solver="saga",
     max_iter=200, random_state=42, n_jobs=-1,
 )
-final_book_model.fit(X_full_scaled, dfTrain["booking_bool"].values)
+final_model.fit(X_full_scaled, y_full_engaged, sample_weight=full_sample_weights)
 
-# Final click model
-final_click_model = LogisticRegression(
-    C=best_params["C"], penalty=best_params["penalty"], solver="saga",
-    max_iter=200, random_state=42, n_jobs=-1,
-)
-final_click_model.fit(X_full_scaled, dfTrain["click_bool"].values)
-
-# Print feature importances (booking model)
+# Print feature importances
 coef_df = pd.DataFrame({
-    "feature": feature_cols, "coefficient": final_book_model.coef_[0]
+    "feature": feature_cols, "coefficient": final_model.coef_[0]
 }).sort_values("coefficient", key=abs, ascending=False)
-print("\n  Top 15 features (booking model):")
+print("\n  Top 15 features:")
 for _, row in coef_df.head(15).iterrows():
     print(f"    {row['feature']:35s} {row['coefficient']:+.4f}")
 
@@ -307,14 +356,12 @@ for _, row in coef_df.head(15).iterrows():
 # PREDICT & SUBMIT
 
 X_test_scaled = scaler_final.transform(test_features_final)
-test_book_preds = final_book_model.predict_proba(X_test_scaled)[:, 1]
-test_click_preds = final_click_model.predict_proba(X_test_scaled)[:, 1]
-test_combined = 5 * test_book_preds + 1 * test_click_preds
+test_preds = final_model.predict_proba(X_test_scaled)[:, 1]
 
 submission = pd.DataFrame({
     "srch_id": dfTest["srch_id"],
     "prop_id": dfTest["prop_id"],
-    "pred": test_combined,
+    "pred": test_preds,
 }).sort_values(["srch_id", "pred"], ascending=[True, False])
 
 submission[["srch_id", "prop_id"]].to_csv("submission_logreg_v2.csv", index=False)
@@ -323,11 +370,16 @@ print(f"  Saved submission_logreg_v2.csv ({len(submission):,} rows)")
 # Save stats
 stats = {
     "best_params": best_params,
+    "best_booking_weight": best_booking_weight,
+    "best_ndcg5": best_weight_ndcg,
     "all_tuning_results": all_results,
+    "all_weight_results": weight_results,
     "top_features": coef_df.head(10).to_dict("records"),
     "features": feature_cols,
 }
 with open("model_stats_v2.json", "w") as f:
     json.dump(stats, f, indent=2, default=str)
 
-print(f"\nBest validation NDCG@5: {best_ndcg:.5f}")
+print(f"\nBest validation NDCG@5: {best_weight_ndcg:.5f}")
+print(f"Best params: C={best_params['C']}, penalty={best_params['penalty']}")
+print(f"Best booking weight: {best_booking_weight}")

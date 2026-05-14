@@ -1,101 +1,137 @@
 {
   "best_params": {
-    "C": 0.01,
-    "penalty": "l1",
-    "ndcg5": 0.32485929178628287
+    "C": 0.001,
+    "penalty": "l2",
+    "ndcg5": 0.32625748138240035
   },
+  "best_booking_weight": 5,
+  "best_ndcg5": 0.32625748138240035,
   "all_tuning_results": [
     {
       "C": 0.001,
       "penalty": "l1",
-      "ndcg5": 0.3241015055565889
+      "ndcg5": 0.32599479303917706
     },
     {
       "C": 0.001,
       "penalty": "l2",
-      "ndcg5": 0.32480982715782003
+      "ndcg5": 0.32625748138240035
     },
     {
       "C": 0.01,
       "penalty": "l1",
-      "ndcg5": 0.32485929178628287
+      "ndcg5": 0.3261031586437361
     },
     {
       "C": 0.01,
       "penalty": "l2",
-      "ndcg5": 0.32484600442235084
+      "ndcg5": 0.32612922470778016
     },
     {
       "C": 0.1,
       "penalty": "l1",
-      "ndcg5": 0.32484581229999043
+      "ndcg5": 0.3261031586437361
     },
     {
       "C": 0.1,
       "penalty": "l2",
-      "ndcg5": 0.32484581229999043
+      "ndcg5": 0.32610424047125197
     },
     {
       "C": 1.0,
       "penalty": "l1",
-      "ndcg5": 0.32484581229999043
+      "ndcg5": 0.3261031586437361
     },
     {
       "C": 1.0,
       "penalty": "l2",
-      "ndcg5": 0.32484581229999043
+      "ndcg5": 0.3261031586437361
     },
     {
       "C": 10.0,
       "penalty": "l1",
-      "ndcg5": 0.32484581229999043
+      "ndcg5": 0.3261031586437361
     },
     {
       "C": 10.0,
       "penalty": "l2",
-      "ndcg5": 0.32484581229999043
+      "ndcg5": 0.3261031586437361
+    }
+  ],
+  "all_weight_results": [
+    {
+      "booking_weight": 1,
+      "ndcg5": 0.3187209343720949
+    },
+    {
+      "booking_weight": 2,
+      "ndcg5": 0.3218538190115695
+    },
+    {
+      "booking_weight": 3,
+      "ndcg5": 0.3231768634205911
+    },
+    {
+      "booking_weight": 5,
+      "ndcg5": 0.32625748138240035
+    },
+    {
+      "booking_weight": 7,
+      "ndcg5": 0.32466132086050586
+    },
+    {
+      "booking_weight": 10,
+      "ndcg5": 0.3241243380260777
+    },
+    {
+      "booking_weight": 15,
+      "ndcg5": 0.323067788353857
+    },
+    {
+      "booking_weight": 20,
+      "ndcg5": 0.32325799158967794
     }
   ],
   "top_features": [
     {
       "feature": "prop_book_rate",
-      "coefficient": 0.12505453824996948
+      "coefficient": 0.1989256739616394
     },
     {
       "feature": "prop_click_rate",
-      "coefficient": 0.06262446939945221
+      "coefficient": 0.18971623480319977
     },
     {
       "feature": "price_rank_in_search",
-      "coefficient": -0.043749962002038956
+      "coefficient": -0.12196066230535507
     },
     {
       "feature": "prop_location_score2",
-      "coefficient": 0.041394297033548355
-    },
-    {
-      "feature": "dest_book_rate",
-      "coefficient": 0.03151681646704674
+      "coefficient": 0.10144522041082382
     },
     {
       "feature": "star_rank_in_search",
-      "coefficient": -0.03126521781086922
-    },
-    {
-      "feature": "price_vs_mean",
-      "coefficient": -0.020648980513215065
-    },
-    {
-      "feature": "promotion_flag",
-      "coefficient": 0.01867632567882538
-    },
-    {
-      "feature": "is_cheapest",
-      "coefficient": 0.016211271286010742
+      "coefficient": -0.06258224695920944
     },
     {
       "feature": "review_rank_in_search",
-      "coefficient": -0.016159702092409134
+      "coefficient": -0.0605493001639843
+    },
+    {
+      "feature": "price_vs_mean",
+      "coefficient": -0.05350486934185028
+    },
+    {
+      "feature": "promotion_flag",
+      "coefficient": 0.048903580754995346
+    },
+    {
+      "feature": "is_cheapest",
+      "coefficient": 0.04250984638929367
+    },
+    {
+      "feature": "dest_book_rate",
+      "coefficient": 0.03272659331560135
     }
   ],
   "features": [
@@ -135,6 +171,9 @@
     "comp_no_inventory_count",
     "price_per_person",
     "total_cost",
+    "price_vs_historical",
+    "price_per_night",
+    "star_per_dollar",
     "prop_click_rate",
     "prop_book_rate",
     "prop_count",
